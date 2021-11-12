@@ -22,7 +22,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::resource('users', UserController::class)->except(['store', 'edit']);
-Route::resource('empresas', EmpresaController::class)->except(['store', 'edit']);
-Route::resource('galerias', GaleriaController::class)->except(['store', 'edit']);
-Route::resource('paquetes', PaqueteController::class)->except(['store', 'edit']);
+Route::resource('users', UserController::class)->except(['create', 'edit']);
+Route::resource('empresas', EmpresaController::class)->except(['create', 'edit']);
+Route::resource('galerias', GaleriaController::class)->except(['create', 'edit']);
+Route::resource('paquetes', PaqueteController::class)->except(['create', 'edit']);

@@ -3,10 +3,16 @@
 namespace App\Http\Controllers\Paquete;
 
 use App\Http\Controllers\Controller;
+use App\Models\Empresa;
+use App\Models\Paquete;
+use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class PaqueteController extends Controller
 {
+    use ApiResponser;
     /**
      * Display a listing of the resource.
      *
@@ -14,18 +20,23 @@ class PaqueteController extends Controller
      */
     public function index()
     {
-        //
+        $orden = 'desc';
+        if(request()->has('precio')){
+            $orden = request()->precio == 'mayor' ? 'desc' : 'asc';
+        }
+        $paquetes = Paquete::with('empresa')
+        ->orderBy('precio_adulto','desc')
+        ->nombre(request()->get('nombre'))
+        ->empresa_id(request()->get('filtro'))
+        ->paginate(9);
+
+        return response()->json([
+            'ok' => true,
+            'paquetes' => $paquetes
+        ]);
+
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -35,7 +46,44 @@ class PaqueteController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(),[
+            'nombre' => ['required'],
+            'empresa_id' => ['required'],
+            'precio_adulto' => ['required'],
+            'precio_nino' => ['required'],
+            'informacion' => ['required'],
+            'caracteristicas' => ['required'],
+            'portada' => ['required'],
+            'empresa_id' => ['required'],
+        ], [
+            'nombre.required' => 'El nombre es requerido',
+            'descripcion.required' =>'La descripcion es requerida',
+            'precio_adulto.required' => 'El precio de adulto es requerido',
+            'precio_nino.required' => 'El precio de niño es requerido',
+            'informacion.required' => 'La informacion es requerida en formado json',
+            'caracteristicas.required' => 'Las caracteristicas son requeridas en formato json',
+            'portada.required' => 'La portada es requerida',
+            'empresa_id.required' => 'La empresa es requerida',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Error al crear paquete',
+                'errors' => $validator->errors()
+            ],401);
+        }
+
+        $data = $request->all();
+
+        $data['portada'] = $request->portada->store($request->nombre);
+
+        $paquete = Paquete::create($data);
+
+        return response()->json([
+            'ok' => true,
+            'paquete' => $paquete,
+        ], 201);
     }
 
     /**
@@ -46,19 +94,17 @@ class PaqueteController extends Controller
      */
     public function show($id)
     {
-        //
+        $paquete = Paquete::with([
+            'galerias',
+            'empresa'
+        ])->find($id);
+
+        return response()->json([
+            'ok' => true,
+            'paquete' => $paquete
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
@@ -67,9 +113,24 @@ class PaqueteController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
-    {
-        //
+    public function update(Request $request, Paquete $paquete)
+    {     
+        $empresa = Empresa::find($paquete->empresa_id);  
+        
+        $data = $request->all();
+
+        if ($request->hasFile('portada')) {
+            Storage::delete($paquete->portada);
+            $data['portada'] = $request->portada->store($request->nombre.'/'.$empresa->nombre);
+        }
+
+        $paquete->update($data);
+        $paquete = Paquete::with(['empresa', 'galerias'])->findOrFail($paquete->id);
+
+        return response()->json([
+            'ok' => true,
+            'paquete' => $paquete
+        ], 201);
     }
 
     /**
@@ -78,8 +139,14 @@ class PaqueteController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Paquete $paquete)
     {
-        //
+        Storage::delete($paquete->portada);
+        $paquete->delete();
+
+        return response()->json([
+            'ok' => true,
+            'reporte' => $paquete
+        ]); 
     }
 }

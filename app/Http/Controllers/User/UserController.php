@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
@@ -14,7 +17,11 @@ class UserController extends Controller
      */
     public function index()
     {
-        //
+        $users = User::paginate(5);
+        return response()->json([
+            'ok' => true,
+            'users' => $users
+        ], 200);
     }
 
     /**
@@ -35,7 +42,35 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(),[
+            'name' => ['required'],
+            'email' => ['required','unique:users'],
+            'password' => ['required','min:5'],
+        ], [
+            'name.required' => 'El nombre de usuario es requerido',
+            'email.required' =>'El correo es requerido',
+            'email.unique' => 'El correo ya ha sido registrado',
+            'password.required' => 'La contraseña es requerida',
+            'password.min' => 'La contraseña debe ser mayor a 4'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Error al crear usuario',
+                'errors' => $validator->errors()
+            ],401);
+        }
+
+        $request['password'] = Hash::make($request->password);
+
+        $usuario = User::create($request->all());
+
+        return response()->json([
+            'ok' => true,
+            'usuario' => $usuario,
+            // 'token' => $token
+        ], 201);
     }
 
     /**

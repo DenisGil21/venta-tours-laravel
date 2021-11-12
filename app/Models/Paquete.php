@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Storage;
 
 class Paquete extends Model
 {
@@ -23,11 +25,31 @@ class Paquete extends Model
         'empresa_id',
     ];
 
+    public function scopeNombre($query, $nombre){
+        if($nombre){
+            return $query->where('nombre', 'LIKE', "%$nombre%");
+        }
+    }
+
+    public function scopeEmpresa_Id($query, $empresa_id){
+        if($empresa_id){
+            return $query->where('empresa_id', 'LIKE', "%$empresa_id%");
+        }
+    }
+
+    public function getPortadaAttribute($value){
+        return Request::root().'/img/'.$value;
+    }
+
     public function empresa(){
         return $this->belongsTo(Empresa::class);
     }
 
     public function ventas(){
         return $this->hasMany(Venta::class);
+    }
+
+    public function galerias(){
+        return $this->hasMany(Galeria::class);
     }
 }
