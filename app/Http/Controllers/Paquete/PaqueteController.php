@@ -76,7 +76,7 @@ class PaqueteController extends Controller
 
         $data = $request->all();
 
-        $data['portada'] = $request->portada->store($request->nombre);
+        $data['portada'] = $request->portada->store('portadas');
 
         $paquete = Paquete::create($data);
 
@@ -115,13 +115,12 @@ class PaqueteController extends Controller
      */
     public function update(Request $request, Paquete $paquete)
     {     
-        $empresa = Empresa::find($paquete->empresa_id);  
-        
+
         $data = $request->all();
 
         if ($request->hasFile('portada')) {
             Storage::delete($paquete->portada);
-            $data['portada'] = $request->portada->store($request->nombre.'/'.$empresa->nombre);
+            $data['portada'] = $request->portada->store('portadas');
         }
 
         $paquete->update($data);

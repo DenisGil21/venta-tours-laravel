@@ -13,7 +13,8 @@ class Galeria extends Model
     protected $dates = ['deteled_at'];
 
     protected $fillable = [
-        'imagen'
+        'imagen',
+        'paquete_id'
     ];
 
     public function paquete(){

@@ -3,7 +3,11 @@
 namespace App\Http\Controllers\Galeria;
 
 use App\Http\Controllers\Controller;
+use App\Models\Galeria;
+use App\Models\Paquete;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class GaleriaController extends Controller
 {
@@ -14,17 +18,12 @@ class GaleriaController extends Controller
      */
     public function index()
     {
-        //
-    }
+        $galerias = Galeria::all();
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        return response()->json([
+            'ok' => true,
+            'galerias' =>$galerias
+        ]);
     }
 
     /**
@@ -35,7 +34,36 @@ class GaleriaController extends Controller
      */
     public function store(Request $request)
     {
-        //
+
+        $validator = Validator::make($request->all(),[
+            'imagen' => ['required','image'],
+            'paquete_id' => ['required']
+        ],[
+            'imagen.required' => 'La imagen es requerida',
+            'imagen.image' => 'El campo imagen deber ser de tipo image',
+            'paquete_id.required' => 'El campo paquete_id  es requerido'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Error al crear paquete',
+                'errors' => $validator->errors()
+            ],400);
+        }
+
+        $paquete = Paquete::with(['empresa'])->find($request->paquete_id);
+
+        $data = $request->all();
+
+        $data['imagen'] = $request->imagen->store($paquete->nombre.'/'.$paquete->empresa->nombre);
+
+        $galeria = Galeria::create($data);
+
+        return response()->json([
+            'ok' => true,
+            'galeria' => $galeria,
+        ], 201);
     }
 
     /**
@@ -50,26 +78,43 @@ class GaleriaController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Galeria $galeria)
     {
-        //
+        $validator = Validator::make($request->all(),[
+            'paquete_id' => ['required']
+        ],[
+            'paquete_id.required' => 'El campo paquete_id  es requerido'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Error al crear paquete',
+                'errors' => $validator->errors()
+            ],400);
+        }
+
+        $paquete = Paquete::with(['empresa'])->find($request->paquete_id);
+
+        $data = $request->all();
+
+        if ($request->hasFile('imagen')) {
+            Storage::delete($galeria->portada);
+            $data['imagen'] = $request->imagen->store($paquete->nombre.'/'.$paquete->empresa->nombre);
+        }
+
+        $galeria->update($data);
+
+        return response()->json([
+            'ok' => true,
+            'galeria' => $galeria
+        ], 201);
     }
 
     /**
@@ -78,8 +123,14 @@ class GaleriaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Galeria $galeria)
     {
-        //
+        Storage::delete($galeria->portada);
+        $galeria->delete();
+
+        return response()->json([
+            'ok' => true,
+            'galeria' => $galeria
+        ]); 
     }
 }
