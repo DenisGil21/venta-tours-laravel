@@ -4,12 +4,22 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Traits\AdminActions;
+use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
+
+    use AdminActions;
+
+    // public function __construct()
+    // {
+    //     $this->middleware('auth:sanctum')->except('store');
+    // }
+
     /**
      * Display a listing of the resource.
      *
@@ -17,6 +27,7 @@ class UserController extends Controller
      */
     public function index()
     {
+        $this->allowedAdminAction();
         $users = User::paginate(5);
         return response()->json([
             'ok' => true,
@@ -24,15 +35,6 @@ class UserController extends Controller
         ], 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -46,12 +48,14 @@ class UserController extends Controller
             'name' => ['required'],
             'email' => ['required','unique:users'],
             'password' => ['required','min:5'],
+            'role' => 'in:'. User::ADMIN_ROLE.','. User::USER_ROLE,
         ], [
             'name.required' => 'El nombre de usuario es requerido',
             'email.required' =>'El correo es requerido',
             'email.unique' => 'El correo ya ha sido registrado',
             'password.required' => 'La contraseña es requerida',
-            'password.min' => 'La contraseña debe ser mayor a 4'
+            'password.min' => 'La contraseña debe ser mayor a 4',
+            'role.in' => 'El role debe ser '.User::ADMIN_ROLE.' o '.User::USER_ROLE
         ]);
 
         if ($validator->fails()) {
@@ -62,14 +66,21 @@ class UserController extends Controller
             ],401);
         }
 
+        if (!$request->role) {
+            $request['role'] = User::USER_ROLE;
+        }else{
+            $campos['role'] = $request->role;
+        }
+
         $request['password'] = Hash::make($request->password);
 
         $usuario = User::create($request->all());
+        $token = $usuario->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'ok' => true,
             'usuario' => $usuario,
-            // 'token' => $token
+            'access_token' => $token
         ], 201);
     }
 
@@ -85,26 +96,27 @@ class UserController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
-    {
-        //
+    public function update(Request $request, User $user)
+    {        
+        $data = $request->all();
+
+        if ($request->has('password')) {
+            $data['password'] = Hash::make($request->password);
+        }
+
+        $user->update($data);
+        $user = User::findOrFail($user->id);
+
+        return response()->json([
+            'ok' => true,
+            'usuario' => $user
+        ], 201);
     }
 
     /**
@@ -113,8 +125,13 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(User $user)
     {
-        //
+        $user->delete();
+
+        return response()->json([
+            'ok' => true,
+            'usuario' => $user
+        ]); 
     }
 }

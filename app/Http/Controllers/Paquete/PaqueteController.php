@@ -71,7 +71,7 @@ class PaqueteController extends Controller
                 'ok' => false,
                 'message' => 'Error al crear paquete',
                 'errors' => $validator->errors()
-            ],401);
+            ],400);
         }
 
         $data = $request->all();

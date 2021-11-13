@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Empresa\EmpresaController;
 use App\Http\Controllers\Galeria\GaleriaController;
 use App\Http\Controllers\Paquete\PaqueteController;
@@ -22,7 +23,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::resource('users', UserController::class)->except(['create', 'edit']);
+Route::post('/login', [AuthController::class, 'login']);
+Route::get('/refresh', [AuthController::class, 'refresh']);
+
+Route::resource('users', UserController::class)->except(['create', 'edit'])->middleware('auth:sanctum')->except('store');
 Route::resource('empresas', EmpresaController::class)->except(['create', 'edit']);
 Route::resource('galerias', GaleriaController::class)->except(['create', 'edit']);
 Route::resource('paquetes', PaqueteController::class)->except(['create', 'edit']);
