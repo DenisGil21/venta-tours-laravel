@@ -16,6 +16,12 @@ class Empresa extends Model
         'nombre'
     ];
 
+    public function scopeNombre($query, $nombre){
+        if($nombre){
+            return $query->where('nombre', 'LIKE', "%$nombre%");
+        }
+    }
+
     public function paquetes(){
         return $this->hasMany(Paquete::class);
     }

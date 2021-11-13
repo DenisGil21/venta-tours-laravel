@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Empresa;
 
 use App\Http\Controllers\Controller;
+use App\Models\Empresa;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class EmpresaController extends Controller
 {
@@ -14,7 +16,14 @@ class EmpresaController extends Controller
      */
     public function index()
     {
-        //
+        $empresas = Empresa::orderBy('id', 'asc')
+        ->nombre(request()->get('nombre'))
+        ->get();
+
+        return response()->json([
+            'ok' => true,
+            'empresas' => $empresas
+        ]);
     }
 
     /**
@@ -22,10 +31,6 @@ class EmpresaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -35,7 +40,27 @@ class EmpresaController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(),[
+            'nombre' => ['required']
+        ],[
+            'nombre.required' => 'El nombre es requerido'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Error al crear empresa',
+                'errors' => $validator->errors()
+            ],400);
+        }
+
+        $empresa = Empresa::create($request->all());
+
+
+        return response()->json([
+            'ok' => true,
+            'empresa' => $empresa,
+        ], 201);
     }
 
     /**
@@ -50,26 +75,20 @@ class EmpresaController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Empresa $empresa)
     {
-        //
+        $empresa->update($request->all());
+
+        return response()->json([
+            'ok' => true,
+            'empresa' => $empresa,
+        ], 201);
     }
 
     /**
@@ -78,8 +97,13 @@ class EmpresaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Empresa $empresa)
     {
-        //
+        $empresa->delete();
+
+        return response()->json([
+            'ok' => true,
+            'empresa' => $empresa
+        ]);
     }
 }

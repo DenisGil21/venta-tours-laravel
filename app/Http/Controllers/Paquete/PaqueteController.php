@@ -25,7 +25,7 @@ class PaqueteController extends Controller
             $orden = request()->precio == 'mayor' ? 'desc' : 'asc';
         }
         $paquetes = Paquete::with('empresa')
-        ->orderBy('precio_adulto','desc')
+        ->orderBy('precio_adulto',$orden)
         ->nombre(request()->get('nombre'))
         ->empresa_id(request()->get('filtro'))
         ->paginate(9);
@@ -146,7 +146,7 @@ class PaqueteController extends Controller
 
         return response()->json([
             'ok' => true,
-            'reporte' => $paquete
+            'paquete' => $paquete
         ]); 
     }
 }
