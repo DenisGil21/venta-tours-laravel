@@ -23,8 +23,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('/login', [AuthController::class, 'login']);
-Route::get('/refresh', [AuthController::class, 'refresh']);
+Route::post('/auth/login', [AuthController::class, 'login']);
+Route::get('/auth/refresh', [AuthController::class, 'refresh'])->middleware('auth:sanctum');
 
 Route::resource('users', UserController::class)->except(['create', 'edit'])->middleware('auth:sanctum')->except('store');
 Route::resource('empresas', EmpresaController::class)->except(['create', 'edit']);
