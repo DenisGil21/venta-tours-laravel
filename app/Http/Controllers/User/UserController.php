@@ -15,10 +15,10 @@ class UserController extends Controller
 
     use AdminActions;
 
-    // public function __construct()
-    // {
-    //     $this->middleware('auth:sanctum')->except('store');
-    // }
+    public function __construct()
+    {
+        $this->middleware('auth:sanctum')->except('store');
+    }
 
     /**
      * Display a listing of the resource.
@@ -28,10 +28,13 @@ class UserController extends Controller
     public function index()
     {
         $this->allowedAdminAction();
-        $users = User::paginate(5);
+        $users = User::orderBy('id')
+        ->first_name(request()->get('nombre'))
+        ->last_name(request()->get('nombre'))
+        ->paginate(5);
         return response()->json([
             'ok' => true,
-            'users' => $users
+            'usuarios' => $users
         ], 200);
     }
 
@@ -45,12 +48,14 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(),[
-            'name' => ['required'],
+            'first_name' => ['required'],
+            'last_name' => ['required'],
             'email' => ['required','unique:users'],
             'password' => ['required','min:5'],
             'role' => 'in:'. User::ADMIN_ROLE.','. User::USER_ROLE,
         ], [
-            'name.required' => 'El nombre de usuario es requerido',
+            'fist_name.required' => 'El nombre de usuario es requerido',
+            'last_name.required' => 'El apellido de usuario es requerido',
             'email.required' =>'El correo es requerido',
             'email.unique' => 'El correo ya ha sido registrado',
             'password.required' => 'La contraseña es requerida',
@@ -80,7 +85,7 @@ class UserController extends Controller
         return response()->json([
             'ok' => true,
             'usuario' => $usuario,
-            'access_token' => $token
+            'token' => $token
         ], 201);
     }
 
@@ -107,7 +112,14 @@ class UserController extends Controller
         $data = $request->all();
 
         if ($request->has('password')) {
-            $data['password'] = Hash::make($request->password);
+            if (Hash::check($request->old_password, $user->password)) {
+                $data['password'] = Hash::make($request->password);
+            }else{
+                return response()->json([
+                    'ok' => false,
+                    'message' => 'La contraseña no coincide con la anterior'
+                ],400);
+            }
         }
 
         $user->update($data);

@@ -25,7 +25,8 @@ class User extends Authenticatable
      * @var string[]
      */
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
         'email',
         'password',
         'role',
@@ -49,6 +50,18 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function scopeFirst_Name($query, $first_name){
+        if($first_name){
+            return $query->orWhere('first_name', 'LIKE', "%$first_name%");
+        }
+    }
+
+    public function scopeLast_Name($query, $last_name){
+        if($last_name){
+            return $query->orWhere('last_name', 'LIKE', "%$last_name%");
+        }
+    }
 
     public function ventas(){
         return $this->hasMany(Venta::class);

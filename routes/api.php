@@ -26,7 +26,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::get('/auth/refresh', [AuthController::class, 'refresh'])->middleware('auth:sanctum');
 
-Route::resource('users', UserController::class)->except(['create', 'edit'])->middleware('auth:sanctum')->except('store');
+Route::resource('users', UserController::class)->except(['create', 'edit']);
 Route::resource('empresas', EmpresaController::class)->except(['create', 'edit']);
 Route::resource('galerias', GaleriaController::class)->except(['create', 'edit']);
 Route::resource('paquetes', PaqueteController::class)->except(['create', 'edit']);
