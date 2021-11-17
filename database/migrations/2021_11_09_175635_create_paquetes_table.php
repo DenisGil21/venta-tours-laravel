@@ -19,9 +19,9 @@ class CreatePaquetesTable extends Migration
             $table->text('descripcion');
             $table->float('precio_adulto',8,2);
             $table->float('precio_nino',8,2);
-            $table->json('informacion');
-            $table->json('caracteristicas');
-            $table->string('portada');
+            $table->json('informacion')->nullable();
+            $table->json('caracteristicas')->nullable();
+            $table->string('portada')->nullable();
             $table->integer('empresa_id')->unsigned();
             $table->foreign('empresa_id')->references('id')->on('empresas');
             $table->softDeletes();

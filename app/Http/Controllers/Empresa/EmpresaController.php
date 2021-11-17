@@ -17,7 +17,7 @@ class EmpresaController extends Controller
     public function index()
     {
         $empresas = Empresa::orderBy('id', 'asc')
-        ->nombre(request()->get('nombre'))
+        ->nombre(request()->get('search'))
         ->get();
 
         return response()->json([

@@ -53,7 +53,7 @@ class PaqueteController extends Controller
             'precio_nino' => ['required'],
             'informacion' => ['required'],
             'caracteristicas' => ['required'],
-            'portada' => ['required'],
+            // 'portada' => ['required'],
             'empresa_id' => ['required'],
         ], [
             'nombre.required' => 'El nombre es requerido',
@@ -62,7 +62,7 @@ class PaqueteController extends Controller
             'precio_nino.required' => 'El precio de niño es requerido',
             'informacion.required' => 'La informacion es requerida en formado json',
             'caracteristicas.required' => 'Las caracteristicas son requeridas en formato json',
-            'portada.required' => 'La portada es requerida',
+            // 'portada.required' => 'La portada es requerida',
             'empresa_id.required' => 'La empresa es requerida',
         ]);
 
@@ -75,8 +75,12 @@ class PaqueteController extends Controller
         }
 
         $data = $request->all();
+        $data['informacion'] = json_encode($request->informacion);
+        $data['caracteristicas'] = json_encode($request->caracteristicas);
 
-        $data['portada'] = $request->portada->store('portadas');
+        if ($request->hasFile('portada')) {
+            $data['portada'] = $request->portada->store('portadas');
+        }
 
         $paquete = Paquete::create($data);
 
