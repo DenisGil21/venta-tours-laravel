@@ -22,7 +22,7 @@ class VentaController extends Controller
         ->paginate(5);
         return response()->json([
             'ok' => true,
-            'ventas' => $ventas
+            'results' => $ventas
         ], 200);
     }
 

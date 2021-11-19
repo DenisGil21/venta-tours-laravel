@@ -56,7 +56,7 @@ class GaleriaController extends Controller
 
         $data = $request->all();
 
-        $data['imagen'] = $request->imagen->store($paquete->nombre.'/'.$paquete->empresa->nombre);
+        $data['imagen'] = $request->imagen->store($paquete->empresa->nombre.'/'.$paquete->nombre);
 
         $galeria = Galeria::create($data);
 
@@ -106,7 +106,7 @@ class GaleriaController extends Controller
 
         if ($request->hasFile('imagen')) {
             Storage::delete($galeria->portada);
-            $data['imagen'] = $request->imagen->store($paquete->nombre.'/'.$paquete->empresa->nombre);
+            $data['imagen'] = $request->imagen->store($paquete->empresa->nombre.'/'.$paquete->nombre);
         }
 
         $galeria->update($data);
@@ -125,7 +125,7 @@ class GaleriaController extends Controller
      */
     public function destroy(Galeria $galeria)
     {
-        Storage::delete($galeria->portada);
+        Storage::delete($galeria->imagen);
         $galeria->delete();
 
         return response()->json([

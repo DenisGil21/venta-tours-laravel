@@ -37,7 +37,7 @@ class PaqueteController extends Controller
 
         return response()->json([
             'ok' => true,
-            'paquetes' => $paquetes
+            'results' => $paquetes
         ]);
 
     }

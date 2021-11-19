@@ -34,7 +34,7 @@ class UserController extends Controller
         ->paginate(5);
         return response()->json([
             'ok' => true,
-            'usuarios' => $users
+            'results' => $users
         ], 200);
     }
 
