@@ -16,14 +16,14 @@ class CreateVentasTable extends Migration
     {
         Schema::create('ventas', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('cliente');
+            $table->string('telefono');
             $table->integer('cantidad_adultos');
             $table->integer('cantidad_ninos');
             $table->integer('subtotal');
             $table->float('total',8,2);
             $table->date('fecha');
-            $table->string('reembolso_compra',50)->nullable();
             $table->string('status')->default(Venta::RESERVADO);
-            $table->string('metodo_pago');
             $table->integer('user_id')->unsigned();
             $table->integer('paquete_id')->unsigned();
             $table->foreign('user_id')->references('id')->on('users');

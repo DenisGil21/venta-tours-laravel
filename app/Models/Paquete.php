@@ -31,9 +31,11 @@ class Paquete extends Model
         }
     }
 
-    public function scopeEmpresa_Id($query, $empresa_id){
-        if($empresa_id){
-            return $query->where('empresa_id', 'LIKE', "%$empresa_id%");
+    public function scopeEmpresa($query, $nombre){
+        if($nombre){
+            return $query->whereHas('empresa', function($empresa) use ($nombre) {
+                $empresa->where('nombre', 'LIKE', "%$nombre%");
+            });
         }
     }
 

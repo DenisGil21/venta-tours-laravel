@@ -27,8 +27,13 @@ class PaqueteController extends Controller
         $paquetes = Paquete::with('empresa')
         ->orderBy('precio_adulto',$orden)
         ->nombre(request()->get('nombre'))
-        ->empresa_id(request()->get('filtro'))
-        ->paginate(9);
+        ->empresa(request()->get('empresa'));
+
+        if (request()->has('all')) {
+            $paquetes = $paquetes->get();
+        }else{
+            $paquetes = $paquetes->paginate(9);
+        }
 
         return response()->json([
             'ok' => true,

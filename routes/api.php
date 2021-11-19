@@ -5,6 +5,7 @@ use App\Http\Controllers\Empresa\EmpresaController;
 use App\Http\Controllers\Galeria\GaleriaController;
 use App\Http\Controllers\Paquete\PaqueteController;
 use App\Http\Controllers\User\UserController;
+use App\Http\Controllers\Venta\VentaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -30,3 +31,4 @@ Route::resource('users', UserController::class)->except(['create', 'edit']);
 Route::resource('empresas', EmpresaController::class)->except(['create', 'edit']);
 Route::resource('galerias', GaleriaController::class)->except(['create', 'edit']);
 Route::resource('paquetes', PaqueteController::class)->except(['create', 'edit']);
+Route::resource('ventas', VentaController::class)->except(['create', 'edit']);

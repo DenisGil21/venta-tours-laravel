@@ -14,23 +14,25 @@ class Venta extends Model
 
     const RESERVADO = 'RESERVADO';
     const CANCELADO = 'CANCELADO';
-    const REEMBOLSADO = 'REEMBOLSADO';
-
-    const PAYPAL = 'PAYPAL';
-    const TARJETA = 'TARJETA';
 
     protected $fillable = [
+        'cliente',
+        'telefono',
         'cantidad_adultos',
         'cantidad_ninos',
         'subtotal',
         'total',
         'fecha',
-        'reembolso_compra',
         'status',
-        'metodo_pago',
         'user_id',
         'paquete_id'
     ];
+
+    public function scopeCliente($query, $cliente){
+        if ($cliente) {
+            $query->where('cliente', 'LIKE', "%$cliente%");
+        }
+    }
 
     public function user(){
         return $this->belongsTo(User::class);
