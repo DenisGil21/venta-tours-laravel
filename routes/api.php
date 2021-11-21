@@ -25,7 +25,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::post('/auth/login', [AuthController::class, 'login']);
-Route::get('/auth/refresh', [AuthController::class, 'refresh'])->middleware('auth:sanctum');
+Route::get('/auth/refresh', [AuthController::class, 'refresh'])->middleware('jwt.auth');
 
 Route::resource('users', UserController::class)->except(['create', 'edit']);
 Route::resource('empresas', EmpresaController::class)->except(['create', 'edit']);

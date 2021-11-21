@@ -13,6 +13,11 @@ use Illuminate\Support\Facades\Validator;
 class PaqueteController extends Controller
 {
     use ApiResponser;
+
+    public function __construct()
+    {
+        $this->middleware('jwt.auth')->except(['index', 'show']);
+    }
     /**
      * Display a listing of the resource.
      *

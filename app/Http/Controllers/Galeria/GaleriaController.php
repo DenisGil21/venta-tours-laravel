@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\Validator;
 
 class GaleriaController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('jwt.auth')->except('index');
+    }
     /**
      * Display a listing of the resource.
      *

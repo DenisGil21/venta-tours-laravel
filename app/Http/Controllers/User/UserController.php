@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Traits\AdminActions;
 use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -17,7 +18,7 @@ class UserController extends Controller
 
     public function __construct()
     {
-        $this->middleware('auth:sanctum')->except('store');
+        $this->middleware('jwt.auth')->except('store');
     }
 
     /**
@@ -47,7 +48,8 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(),[
+        $campos = $request->all();
+        $validator = Validator::make($campos,[
             'first_name' => ['required'],
             'last_name' => ['required'],
             'email' => ['required','unique:users'],
@@ -77,10 +79,10 @@ class UserController extends Controller
             $campos['role'] = $request->role;
         }
 
-        $request['password'] = Hash::make($request->password);
+        $campos['password'] = Hash::make($request->password);
 
-        $usuario = User::create($request->all());
-        $token = $usuario->createToken('auth_token')->plainTextToken;
+        $usuario = User::create($campos);
+        $token = Auth::attempt(['email' => $campos['email'], 'password' => $request->password]);
 
         return response()->json([
             'ok' => true,

@@ -6,11 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Tymon\JWTAuth\Exceptions\TokenBlacklistedException;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
+use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 
 class AuthController extends Controller
 {
     public function login(Request $request){
-        if (!Auth::attempt($request->only(['email', 'password']))) {
+        $credentials = $request->only(['email', 'password']);
+
+        if (!Auth::attempt($credentials)) {
             return response()->json([
                 'ok' => false,
                 'message' => 'Credenciales invalidas'
@@ -18,7 +23,8 @@ class AuthController extends Controller
         }
 
         $usuario = User::where('email',$request->email)->firstOrFail();
-        $token = $usuario->createToken('auth_token')->plainTextToken;
+        $token = Auth::attempt($credentials);
+
 
         return response()->json([
             'ok' => true,
@@ -28,19 +34,34 @@ class AuthController extends Controller
 
     }
 
-    public function refresh(Request $request){
+    public function refresh(){
        
-            $usuario = $request->user();
+            $usuario = Auth::user();
 
-            $usuario->currentAccessToken()->delete();
-
-            $token = $usuario->createToken('auth_token')->plainTextToken;
-
-            return response()->json([
-                'ok'=> true,
-                'token' => $token,
-                'usuario' => $usuario,
-            ], 200);
+            $token = Auth::getToken();
+            try {
+                $token = Auth::refresh($token);
+                return response()->json([
+                    'ok'=> true,
+                    'token' => $token,
+                    'usuario' => $usuario,
+                ], 200);
+            } catch (TokenExpiredException $e) {
+                return response()->json([
+                    'ok' => false,
+                    'message' => 'El token ha expirado'
+                ], 401);
+            } catch (TokenBlacklistedException $e) {
+                return response()->json([
+                    'ok' => false,
+                    'message' => 'El token ha cambiado, necesita volver a loguearse'
+                ], 401);
+            } catch (TokenInvalidException $e) {
+                return response()->json([
+                    'ok' => false,
+                    'message' => 'Token invalido'
+                ], 401);
+            }
     }
 
     
