@@ -47,7 +47,7 @@ class Handler extends ExceptionHandler
         });
 
         $this->renderable(function(Exception $e, $request) {
-            return $this->handleException($request, $e);
+            // return $this->handleException($request, $e);
         });
     }
     
